@@ -164,6 +164,9 @@ HttpServer.use(async ctx => {
 		const range = Range(ctx.headers.range, content.length);
 		const response = ctx.response;
 
+		response.type = content.contentType;
+		response.set('Content-disposition', 'attachment; filename=' + content.filename);
+
 		if (range)
 		{
 			response.set('Content-Range', `bytes ${range.start}-${range.end}/${range.totalLength}`);
@@ -175,17 +178,15 @@ HttpServer.use(async ctx => {
 				start: range.start,
 				end: range.end,
 			});
+			console.log(`${response.status || 200} ${range.start}-${range.end}/${range.totalLength} ${url}`);
 		}
 		else
 		{
 			response.set('Content-Length', content.length);
 			response.body = FS.createReadStream(content.path);
+			console.log(`${response.status || 200} 0/${content.length} ${url}`);
 		}
 
-		response.type = content.contentType;
-		response.set('Content-disposition', 'attachment; filename=' + content.filename);
-
-		console.log(`${response.status || 200} ${url}`);
 		return;
 	}
 	else if (content.type == 'error')

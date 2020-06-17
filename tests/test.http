@@ -1,2 +1,2 @@
 GET http://localhost/Downloads/Test%20Video/burosch1.mpg
-Range: bytes=0-1000
+Range: bytes=0-65536
