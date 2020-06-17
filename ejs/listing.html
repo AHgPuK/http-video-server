@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+</head>
+<body>
+
+<h1>
+    <%
+        var parts = title.split('/');
+        parts.shift();
+        for (var i = 0; i < parts.length; i++) {
+            var part = parts[i];
+            if (i == 0 && part != '') {
+                %><a href="/">/</a><%
+            }
+            else {
+                %>/<%
+            }
+
+            var link = parts.slice(0, i + 1).join('/');
+            %><a href="/<%- link %>"><%= part %></a><%
+        }
+    %>
+</h1>
+
+<ul>
+    <% for (var i = 0; i < list.length; i++) { %>
+    <% var item = list[i]; %>
+    <li>
+        <a href="<%= (title.length == 1 ? '' : title) + '/' + item.name %>"><%= item.name %></a>
+    </li>
+
+    <% } // end for %>
+</ul>
+
+</body>
+</html>

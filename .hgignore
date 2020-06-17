@@ -1,0 +1,5 @@
+syntax: glob
+.idea/
+chrome-win/
+node_modules/
+package-lock.json
