@@ -9,6 +9,13 @@ const Range = require('./lib/range');
 
 const HttpServer = new Koa();
 
+HttpServer.on('error', (error) => {
+	if (error.code === 'ECONNRESET') {
+		// console.warn('Koa app-level EPIPE error.', { error })
+	} else {
+		console.error('Koa app-level error', error)
+	}
+})
 
 const getRoot = () => {
 	const public = Config.public || [];
@@ -93,6 +100,7 @@ const resolvePath = (path) => {
 			contentType: MimeType.getMimeType(buffer) || 'application/octet-stream',
 			filename: Path.basename(entryPath),
 			length: stats.size,
+			lastModified: stats.mtime,
 		}
 	}
 
@@ -141,11 +149,49 @@ const getContent = (path) => {
 	return error404(path);
 }
 
+const getFileContent = ({ctx, content, url}) => {
+	let range = Range(ctx.headers.range, content.length);
+	const response = ctx.response;
+
+	response.type = content.contentType;
+	// response.type = 'video/mp4';
+	response.set('Content-disposition', 'attachment; filename=' + content.filename);
+	response.set('Last-Modified', new Date(content.lastModified).toUTCString());
+	response.set('Accept-Ranges', 'bytes');
+
+	if (range)
+	{
+		response.set('Content-Range', `bytes ${range.start}-${range.end}/${range.totalLength}`);
+		response.set('Content-Length', range.end - range.start + 1);
+		response.set('Cache-Control', 'no-cache');
+		response.status = 206;
+		response.body = FS.createReadStream(content.path, {
+			start: range.start,
+			end: range.end,
+		});
+	}
+	else
+	{
+		response.set('Content-Length', content.length);
+		response.body = FS.createReadStream(content.path);
+	}
+
+	range = range || {
+		start: 0,
+		end: content.length,
+		totalLength: content.length,
+	}
+
+	console.log(`${response.status || 200}\t${range.start}-${range.end}/${range.totalLength}\t${url}\t${ctx.req.headers['user-agent']}`);
+
+	return;
+}
+
 
 
 HttpServer.use(async ctx => {
 
-	const url = decodeURI(ctx.url);
+	const url = decodeURI(ctx.path);
 	const content = getContent(url);
 
 	let response = '';
@@ -161,33 +207,25 @@ HttpServer.use(async ctx => {
 	}
 	else if (content.type == 'file')
 	{
-		const range = Range(ctx.headers.range, content.length);
-		const response = ctx.response;
-
-		response.type = content.contentType;
-		response.set('Content-disposition', 'attachment; filename=' + content.filename);
-
-		if (range)
+		if (ctx.query && 'play' in ctx.query)
 		{
-			response.set('Content-Range', `bytes ${range.start}-${range.end}/${range.totalLength}`);
-			response.set('Content-Length', range.end - range.start + 1);
-			response.set('Accept-Ranges', 'bytes');
-			response.set('Cache-Control', 'no-cache');
-			response.status = 206;
-			response.body = FS.createReadStream(content.path, {
-				start: range.start,
-				end: range.end,
+			getFileContent({
+				ctx,
+				content,
+				url,
 			});
-			console.log(`${response.status || 200} ${range.start}-${range.end}/${range.totalLength} ${url}`);
+			return;
 		}
 		else
 		{
-			response.set('Content-Length', content.length);
-			response.body = FS.createReadStream(content.path);
-			console.log(`${response.status || 200} 0/${content.length} ${url}`);
+			response = await EJS.renderFile('./ejs/player.html', {
+				title: Path.basename(url),
+				url: Path.basename(url),
+				type: content.contentType,
+			}, {
+				async: true,
+			})
 		}
-
-		return;
 	}
 	else if (content.type == 'error')
 	{

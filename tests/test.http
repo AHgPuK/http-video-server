@@ -1,2 +1,7 @@
+###
 GET http://localhost/Downloads/Test%20Video/burosch1.mpg
-Range: bytes=0-65536
+
+###
+
+GET http://localhost/Downloads/Test%20Video/burosch1.mpg?play
+Range: bytes=0-
