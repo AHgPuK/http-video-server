@@ -187,6 +187,18 @@ const getFileContent = ({ctx, content, url}) => {
 	return;
 }
 
+HttpServer.use(async (ctx, next) => {
+
+	const static = Config.statics[ctx.url];
+
+	if (!static)
+	{
+		return next();
+	}
+
+	ctx.type = 'application/javascript';
+	ctx.body = FS.createReadStream(static);
+})
 
 
 HttpServer.use(async ctx => {

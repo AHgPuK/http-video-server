@@ -15,19 +15,31 @@
 			try
 			{
 				var elem = document.getElementById("video");
-				if (elem.requestFullscreen) {
+				if (elem.requestFullscreen)
+				{
 					elem.requestFullscreen();
-				} else if (elem.mozRequestFullScreen) {
+				}
+				else if (elem.mozRequestFullScreen)
+				{
 					elem.mozRequestFullScreen();
-				} else if (elem.webkitRequestFullscreen) {
+				}
+				else if (elem.webkitRequestFullscreen)
+				{
 					elem.webkitRequestFullscreen();
-				} else if (elem.msRequestFullscreen) {
+				}
+				else if (elem.msRequestFullscreen)
+				{
 					elem.msRequestFullscreen();
 				}
+				else
+                {
+                	alert('requestFullscreen is not supported')
+                }
+
 			}
 			catch (e)
 			{
-
+                alert('requestFullscreen error:' + e.message);
 			}
 		}
 
@@ -74,6 +86,16 @@
 
 </body>
 
+<script>
+
+    var video = document.querySelector('video');
+    video.addEventListener('ended', function () {
+        setTimeout(function () {
+			window.history.back();
+		}, 1500);
+	})
+
+</script>
 
 
 </html>

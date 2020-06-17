@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
 
+    <script src="/navigate.js"></script>
     <style>
 
         :focus  { outline: thick solid black }
@@ -47,15 +48,41 @@
     %>
 </h1>
 
-<ul>
+<form method="get" action="/">
+<ul id="navigateElem" style="--spatial-navigation-contain: contain; --spatial-navigation-function: normal;">
     <% for (var i = 0; i < list.length; i++) { %>
     <% var item = list[i]; %>
     <li>
-        <a id="el<%= i %>" href="<%= (title.length == 1 ? '' : title) + '/' + item.name %>"><%= item.name %></a>
+        <button type="submit" id="el<%= i %>" name="el<%= i %>" formmethod="get" formtarget="_self" formaction="<%= (title.length == 1 ? '' : title) + '/' + item.name %>" <%= i == 0 ? 'autofocus=autofocus' : '' %> tabindex="1"><%= item.name %></button>
     </li>
 
     <% } // end for %>
 </ul>
+</form>
 
 </body>
+
+<script>
+
+	const WASD_KEY_CODE = {
+		65: 'left', 87: 'up', 68: 'right', 83: 'down',
+        37: 'left', 38: 'up', 39: 'right', 40: 'down',
+        105: 'left', 104: 'up', 106: 'right', 108: 'down',
+        // 33: 'up', 34: 'down',
+	};
+	const navRootElem = document.querySelector('body');
+	navRootElem.addEventListener('keydown', function(e) {
+		const dir = WASD_KEY_CODE[e.keyCode];
+		if(window.navigate && dir) {
+			window.navigate(dir);
+			e.preventDefault();
+		}
+		else
+        {
+        	document.body.appendChild(document.createTextNode(e.keyCode));
+        }
+	}, true);
+
+</script>
+
 </html>

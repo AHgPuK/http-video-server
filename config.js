@@ -11,5 +11,8 @@ module.exports = {
 			"type": "dir",
 		},
 	],
+	"statics": {
+		"/navigate.js": "./public/navigate.js"
+	},
 	port: 80,
 }
