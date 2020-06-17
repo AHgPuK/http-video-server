@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <title><%= title %></title>
 
@@ -9,33 +10,70 @@
 <!--    <link href="https://unpkg.com/@videojs/themes@1/dist/city/index.css" rel="stylesheet" />-->
     <script>
 		window.HELP_IMPROVE_VIDEOJS = false;
+
+		var requestFullscreen = function () {
+			try
+			{
+				var elem = document.getElementById("video");
+				if (elem.requestFullscreen) {
+					elem.requestFullscreen();
+				} else if (elem.mozRequestFullScreen) {
+					elem.mozRequestFullScreen();
+				} else if (elem.webkitRequestFullscreen) {
+					elem.webkitRequestFullscreen();
+				} else if (elem.msRequestFullscreen) {
+					elem.msRequestFullscreen();
+				}
+			}
+			catch (e)
+			{
+
+			}
+		}
+
+		window.addEventListener('load', function () {
+			requestFullscreen();
+		})
+
     </script>
-    <script src="https://vjs.zencdn.net/7.8.2/video.js"></script>
+<!--    <script src="https://vjs.zencdn.net/7.8.2/video.js"></script>-->
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: black;
+        }
+
+        video {
+            overflow: hidden;
+        }
+    </style>
 
 </head>
 <body>
 
 <video
-        id="my-video"
-        class="video-js "
+        id="video"
+        class="video-js1 "
         controls
         preload="auto"
-        width="640"
-        height="264"
         autoplay
+        width="100%"
         data-setup="{}"
 >
     <source src="<%- url %>?play">
     <p class="vjs-no-js">
         To view this video please enable JavaScript, and consider upgrading to a
         web browser that
-        <a href="https://videojs.com/html5-video-support/" target="_blank"
-        >supports HTML5 video</a
-        >
+        supports HTML5 video
     </p>
 </video>
 
 
-
 </body>
+
+
+
 </html>

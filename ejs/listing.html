@@ -4,6 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
+
+    <style>
+
+        :focus  { outline: thick solid black }
+        :active { outline: thick solid red }
+
+        #el0 {
+            nav-down: #el1;
+        }
+
+        #el1 {
+            nav-down: #el2;
+            nav-up: #el0;
+        }
+
+        #el2 {
+            nav-down: #el3;
+            nav-up: #el1;
+        }
+
+    </style>
 </head>
 <body>
 
@@ -30,7 +51,7 @@
     <% for (var i = 0; i < list.length; i++) { %>
     <% var item = list[i]; %>
     <li>
-        <a href="<%= (title.length == 1 ? '' : title) + '/' + item.name %>"><%= item.name %></a>
+        <a id="el<%= i %>" href="<%= (title.length == 1 ? '' : title) + '/' + item.name %>"><%= item.name %></a>
     </li>
 
     <% } // end for %>
