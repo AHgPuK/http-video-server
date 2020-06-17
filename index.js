@@ -4,6 +4,7 @@ const FS = require('fs');
 const Path = require('path');
 
 const Config = require('./config');
+const MimeType = require('./lib/mimetype');
 
 const HttpServer = new Koa();
 
@@ -81,12 +82,30 @@ const resolvePath = (path) => {
 		}
 	}
 	else {
+
+		// Probe
+		const buffer = readFileSegment(entryPath, 0, 65536);
+
 		return {
 			type: 'file',
 			path: entryPath,
+			contentType: MimeType.getMimeType(buffer) || 'application/octet-stream',
+			filename: Path.basename(entryPath),
 		}
 	}
 
+}
+
+const readFileSegment = function (path, offset, length) {
+
+	const fd = FS.openSync(path);
+
+	const buffer = Buffer.alloc(length);
+	const bytesRead	= FS.readSync(fd, buffer, 0, length, offset);
+
+	FS.closeSync(fd);
+
+	return buffer.slice(0, bytesRead);
 }
 
 const getDirContent = (path) => {
@@ -140,6 +159,8 @@ HttpServer.use(async ctx => {
 	}
 	else if (content.type == 'file')
 	{
+		ctx.response.type = content.contentType;
+		ctx.response.set('Content-disposition', 'attachment; filename=' + content.filename);
 		ctx.response.body = FS.createReadStream(content.path);
 		console.log(`${ctx.status || 200} ${url}`);
 		return;
