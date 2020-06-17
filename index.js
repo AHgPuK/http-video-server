@@ -5,6 +5,7 @@ const Path = require('path');
 
 const Config = require('./config');
 const MimeType = require('./lib/mimetype');
+const Range = require('./lib/range');
 
 const HttpServer = new Koa();
 
@@ -91,6 +92,7 @@ const resolvePath = (path) => {
 			path: entryPath,
 			contentType: MimeType.getMimeType(buffer) || 'application/octet-stream',
 			filename: Path.basename(entryPath),
+			length: stats.size,
 		}
 	}
 
@@ -143,7 +145,7 @@ const getContent = (path) => {
 
 HttpServer.use(async ctx => {
 
-	const url = decodeURIComponent(ctx.url);
+	const url = decodeURI(ctx.url);
 	const content = getContent(url);
 
 	let response = '';
@@ -159,10 +161,31 @@ HttpServer.use(async ctx => {
 	}
 	else if (content.type == 'file')
 	{
-		ctx.response.type = content.contentType;
-		ctx.response.set('Content-disposition', 'attachment; filename=' + content.filename);
-		ctx.response.body = FS.createReadStream(content.path);
-		console.log(`${ctx.status || 200} ${url}`);
+		const range = Range(ctx.headers.range, content.length);
+		const response = ctx.response;
+
+		if (range)
+		{
+			response.set('Content-Range', `bytes ${range.start}-${range.end}/${range.totalLength}`);
+			response.set('Content-Length', range.end - range.start + 1);
+			response.set('Accept-Ranges', 'bytes');
+			response.set('Cache-Control', 'no-cache');
+			response.status = 206;
+			response.body = FS.createReadStream(content.path, {
+				start: range.start,
+				end: range.end,
+			});
+		}
+		else
+		{
+			response.set('Content-Length', content.length);
+			response.body = FS.createReadStream(content.path);
+		}
+
+		response.type = content.contentType;
+		response.set('Content-disposition', 'attachment; filename=' + content.filename);
+
+		console.log(`${response.status || 200} ${url}`);
 		return;
 	}
 	else if (content.type == 'error')
