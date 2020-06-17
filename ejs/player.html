@@ -12,40 +12,30 @@
 		window.HELP_IMPROVE_VIDEOJS = false;
 
 		var requestFullscreen = function () {
+			const names = [
+				'requestFullscreen',
+				'mozRequestFullScreen',
+				'webkitRequestFullscreen',
+				'msRequestFullscreen',
+            ];
+
 			try
 			{
 				var elem = document.getElementById("video");
-				if (elem.requestFullscreen)
+				for (let i = 0; i < names.length; i++)
 				{
-					elem.requestFullscreen();
+					const name = names[i];
+					if (elem[name])
+                    {
+						elem[name]();
+						break;
+                    }
 				}
-				else if (elem.mozRequestFullScreen)
-				{
-					elem.mozRequestFullScreen();
-				}
-				else if (elem.webkitRequestFullscreen)
-				{
-					elem.webkitRequestFullscreen();
-				}
-				else if (elem.msRequestFullscreen)
-				{
-					elem.msRequestFullscreen();
-				}
-				else
-                {
-                	alert('requestFullscreen is not supported')
-                }
-
 			}
 			catch (e)
 			{
-                alert('requestFullscreen error:' + e.message);
 			}
 		}
-
-		window.addEventListener('load', function () {
-			requestFullscreen();
-		})
 
     </script>
 <!--    <script src="https://vjs.zencdn.net/7.8.2/video.js"></script>-->
@@ -71,7 +61,7 @@
         class="video-js1 "
         controls
         preload="auto"
-        autoplay
+        autoplay="true"
         width="100%"
         data-setup="{}"
 >
@@ -93,7 +83,19 @@
         setTimeout(function () {
 			window.history.back();
 		}, 1500);
-	})
+	});
+
+	video.addEventListener('play', function () {
+		requestFullscreen();
+	});
+
+	video.addEventListener('keydown', function (e) {
+		if (e.keyCode == 27)
+        {
+			window.history.back();
+			e.preventDefault();
+        }
+	}, true);
 
 </script>
 

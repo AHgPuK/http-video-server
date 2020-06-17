@@ -254,3 +254,4 @@ HttpServer.use(async ctx => {
 HttpServer.listen(Config.port);
 
 console.log(`Started on port ${Config.port}`);
+console.log(`Open: http://localhost${Config.port != 80 ? Config.port : ''}`)

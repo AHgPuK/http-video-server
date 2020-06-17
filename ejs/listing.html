@@ -8,21 +8,16 @@
     <script src="/navigate.js"></script>
     <style>
 
-        :focus  { outline: thick solid black }
-        :active { outline: thick solid red }
+        :focus  { outline: 2px solid green }
+        /*:active { outline: 2px solid red }*/
 
-        #el0 {
-            nav-down: #el1;
+        li {
+            margin: 5px 0;
+            padding: 0;
         }
 
-        #el1 {
-            nav-down: #el2;
-            nav-up: #el0;
-        }
-
-        #el2 {
-            nav-down: #el3;
-            nav-up: #el1;
+        li > a {
+            padding: 2px 4px;
         }
 
     </style>
@@ -48,17 +43,15 @@
     %>
 </h1>
 
-<form method="get" action="/">
-<ul id="navigateElem" style="--spatial-navigation-contain: contain; --spatial-navigation-function: normal;">
+<ol id="navigateElem" style="--spatial-navigation-contain: contain; --spatial-navigation-function: normal;">
     <% for (var i = 0; i < list.length; i++) { %>
     <% var item = list[i]; %>
     <li>
-        <button type="submit" id="el<%= i %>" name="el<%= i %>" formmethod="get" formtarget="_self" formaction="<%= (title.length == 1 ? '' : title) + '/' + item.name %>" <%= i == 0 ? 'autofocus=autofocus' : '' %> tabindex="1"><%= item.name %></button>
+        <a id="el<%= i %>" href="<%= (title.length == 1 ? '' : title) + '/' + item.name %>" <%= i == 0 ? 'autofocus' : '' %> ><%= item.name %></a>
     </li>
 
     <% } // end for %>
-</ul>
-</form>
+</ol>
 
 </body>
 
@@ -79,9 +72,20 @@
 		}
 		else
         {
-        	document.body.appendChild(document.createTextNode(e.keyCode));
+        	// document.body.appendChild(document.createTextNode(e.keyCode));
         }
 	}, true);
+
+	window.addEventListener('load', function() {
+
+		const autoFocusElement = document.querySelector('[autofocus]');
+
+		if (autoFocusElement)
+        {
+        	autoFocusElement.focus();
+        }
+
+    })
 
 </script>
 
